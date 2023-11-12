@@ -5,12 +5,11 @@ on: [push, workflow_dispatch]
 
 #Environment variables https://docs.github.com/en/actions/learn-github-actions/environment-variables
 env:
-  RESOURCE-GROUP: rg-az400-eshoponweb-NAME
+  RESOURCE-GROUP: rg-az400-eshoponweb
   LOCATION: westeurope
   TEMPLATE-FILE: .azure/bicep/webapp.bicep
-  SUBSCRIPTION-ID: YOUR-SUBS-ID
-  WEBAPP-NAME: az400-webapp-NAME
-
+  SUBSCRIPTION-ID: 74f2e19d-6a06-43d6-af5b-6907ab99f0eb
+  WEBAPP-NAME: az400-webapp
 
 jobs:
   #Build, test and publish .net web project in repository
@@ -60,34 +59,4 @@ jobs:
       with:
         name: .net-app
         path: .net-app
-  
-    #Download the bicep templates from previous job
-    - name: Download artifact from build job
-      uses: actions/download-artifact@v3
-      with:
-        name: bicep-template
-        path: bicep-template
-        
-   #Login in your azure subscription using a service principal (credentials stored as GitHub Secret in repo)
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-           
-    # Deploy Azure WebApp using Bicep file
-    - name: deploy
-      uses: azure/arm-deploy@v1
-      with:
-        subscriptionId: ${{ env.SUBSCRIPTION-ID }}
-        resourceGroupName: ${{ env.RESOURCE-GROUP }}
-        template: bicep-template/webapp.bicep
-        parameters: 'webAppName=${{ env.WEBAPP-NAME }} location=${{ env.LOCATION }}'
-        failOnStdErr: false   
-    
-    # Publish website to Azure App Service (WebApp)
-    - name: Publish Website to WebApp
-      uses: Azure/webapps-deploy@v2
-      with:
-        app-name: ${{ env.WEBAPP-NAME  }}
-        package: .net-app
    
